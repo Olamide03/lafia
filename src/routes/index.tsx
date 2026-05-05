@@ -13,10 +13,18 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Lafia — Nigeria's Unified Health Identity Platform" },
-      { name: "description", content: "One identity. One record. Accountable always. Lafia gives every Nigerian a permanent NIN-anchored medical record across every hospital." },
-      { property: "og:title", content: "Lafia — Nigeria's Unified Health Identity" },
-      { property: "og:description", content: "Built on the NIN. A permanent, portable, secure medical record for every Nigerian — for life." },
+      { title: "Lafia | Nigeria's Unified Health Identity Platform" },
+      {
+        name: "description",
+        content:
+          "One identity. One record. Accountable always. Lafia gives every Nigerian a permanent NIN-anchored medical record across every hospital.",
+      },
+      { property: "og:title", content: "Lafia | Nigeria's Unified Health Identity" },
+      {
+        property: "og:description",
+        content:
+          "Built on the NIN. A permanent, portable, secure medical record for every Nigerian - for life.",
+      },
     ],
   }),
 });

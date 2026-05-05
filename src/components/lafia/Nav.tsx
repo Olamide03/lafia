@@ -19,10 +19,18 @@ export function Nav() {
           </span>
         </a>
         <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#problem" className="hover:text-foreground transition">The Problem</a>
-          <a href="#emergency" className="hover:text-foreground transition">Emergency</a>
-          <a href="#how" className="hover:text-foreground transition">How it Works</a>
-          <a href="#features" className="hover:text-foreground transition">Features</a>
+          <a href="#problem" className="hover:text-foreground transition">
+            The Problem
+          </a>
+          <a href="#emergency" className="hover:text-foreground transition">
+            Emergency
+          </a>
+          <a href="#how" className="hover:text-foreground transition">
+            How it Works
+          </a>
+          <a href="#features" className="hover:text-foreground transition">
+            Features
+          </a>
         </nav>
         <a
           href="#waitlist"
