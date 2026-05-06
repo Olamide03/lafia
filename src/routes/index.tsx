@@ -6,6 +6,7 @@ import { Emergency } from "@/components/lafia/Emergency";
 import { OutbreakChart } from "@/components/lafia/OutbreakChart";
 import { HowItWorks } from "@/components/lafia/HowItWorks";
 import { Features } from "@/components/lafia/Features";
+import { RecordPreview } from "@/components/lafia/RecordPreview";
 import { Waitlist } from "@/components/lafia/Waitlist";
 import { Footer } from "@/components/lafia/Footer";
 
@@ -39,6 +40,7 @@ function Index() {
       <OutbreakChart />
       <HowItWorks />
       <Features />
+      <RecordPreview />
       <Waitlist />
       <Footer />
     </main>
