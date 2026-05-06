@@ -261,7 +261,7 @@ function SectionCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-border bg-card/55 p-5 sm:p-6">
+    <div className="rounded-[1.25rem] border border-border bg-card/55 p-4 sm:rounded-[1.5rem] sm:p-6">
       <div className="mb-5 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
         {icon}
         <span>{title}</span>
@@ -273,9 +273,9 @@ function SectionCard({
 
 function KRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex gap-4 text-sm">
-      <div className="min-w-32 text-muted-foreground">{label}</div>
-      <div className="text-foreground">{value}</div>
+    <div className="flex flex-col gap-1 text-sm sm:flex-row sm:gap-4">
+      <div className="min-w-0 text-muted-foreground sm:min-w-32">{label}</div>
+      <div className="break-words text-foreground">{value}</div>
     </div>
   );
 }
@@ -302,25 +302,35 @@ function DataTable({
       <div className="divide-y divide-border">
         {rows.map((row, index) => (
           <div key={`${row[0]}-${index}`} className={`grid gap-2 px-5 py-4 text-sm ${gridClass}`}>
-            {row.slice(0, columns).map((cell, cellIndex) => (
-              <div
-                key={`${row[0]}-${cellIndex}`}
-                className={
-                  cellIndex === row.length - 1 && cell !== "Normal"
-                    ? "font-medium text-amber"
-                    : cellIndex === row.length - 1 && cell === "Normal"
-                      ? "font-medium text-emerald"
+            {row.slice(0, columns).map((cell, cellIndex) => {
+              const tone = row[columns];
+              const toneClass =
+                tone === "green"
+                  ? "font-medium text-emerald"
+                  : tone === "red"
+                    ? "font-medium text-red-300"
+                    : tone === "amber"
+                      ? "font-medium text-amber"
+                      : "";
+
+              return (
+                <div
+                  key={`${row[0]}-${cellIndex}`}
+                  className={
+                    cellIndex === columns - 1
+                      ? toneClass || (cell === "Normal" ? "font-medium text-emerald" : "font-medium text-amber")
                       : cellIndex === 0
                         ? "text-foreground"
                         : "text-muted-foreground"
-                }
-              >
-                <span className="mb-1 block text-[11px] uppercase tracking-[0.18em] text-muted-foreground md:hidden">
-                  {headers[cellIndex]}
-                </span>
-                {cell}
-              </div>
-            ))}
+                  }
+                >
+                  <span className="mb-1 block text-[11px] uppercase tracking-[0.18em] text-muted-foreground md:hidden">
+                    {headers[cellIndex]}
+                  </span>
+                  {cell}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
@@ -360,14 +370,14 @@ export function RecordPreview() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 
   return (
-    <section id="record-preview" className="relative border-t border-border py-32 lg:py-40">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+    <section id="record-preview" className="relative border-t border-border py-20 sm:py-24 lg:py-40">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-14 max-w-4xl"
+          className="mb-10 max-w-4xl sm:mb-14"
         >
           <div className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-emerald">
             Section 06 - Doctor View
@@ -375,7 +385,7 @@ export function RecordPreview() {
           <h2 className="font-display text-[clamp(2rem,5vw,4rem)] leading-[1] tracking-[-0.02em] text-balance">
             Show a doctor the record they wish already existed.
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
             Lafia is not only a national identity layer. It is a clinical working surface. The
             moment a doctor opens a patient record, they should immediately see allergy risk,
             relevant prior encounters, linked investigations, medication history, maternal history,
@@ -390,12 +400,12 @@ export function RecordPreview() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9 }}
-          className="overflow-hidden rounded-[2rem] border border-border bg-[linear-gradient(180deg,rgba(17,24,39,0.95),rgba(12,18,30,0.98))] shadow-[0_30px_100px_rgba(0,0,0,0.35)]"
+          className="overflow-hidden rounded-[1.5rem] border border-border bg-[linear-gradient(180deg,rgba(17,24,39,0.95),rgba(12,18,30,0.98))] shadow-[0_30px_100px_rgba(0,0,0,0.35)] sm:rounded-[2rem]"
         >
           <div className="border-b border-border bg-card/40 px-5 py-4 sm:px-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Clock3 className="h-4 w-4 text-emerald" />
+              <div className="flex items-start gap-3 text-sm text-muted-foreground sm:items-center">
+                <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-emerald sm:mt-0" />
                 <span>
                   Record last updated: <strong className="text-foreground">01 May 2026, 09:17 AM</strong> — Dr.
                   Amaka Eze, UNTH Enugu (Obstetrics &amp; Gynaecology)
@@ -420,14 +430,14 @@ export function RecordPreview() {
           <div className="px-5 py-6 sm:px-8 sm:py-8">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-                <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full border border-sky-400/20 bg-sky-500/10 text-2xl font-medium text-sky-200">
+                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-sky-400/20 bg-sky-500/10 text-xl font-medium text-sky-200 sm:h-20 sm:w-20 sm:text-2xl">
                   NO
                 </div>
                 <div>
-                  <h3 className="text-3xl font-semibold tracking-tight text-foreground">
+                  <h3 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                     Ngozi Adaeze Okafor
                   </h3>
-                  <p className="mt-2 text-base text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground sm:text-base">
                     Female · 34 years · DOB: 22 August 1991 · Blood type: A+ · Genotype: AS
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -441,7 +451,7 @@ export function RecordPreview() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border bg-card/70 px-4 py-4 text-sm xl:min-w-64">
+              <div className="w-full rounded-2xl border border-border bg-card/70 px-4 py-4 text-sm xl:min-w-64 xl:w-auto">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Lafia Patient ID
                 </div>
@@ -450,13 +460,13 @@ export function RecordPreview() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-2 border-b border-border pb-4">
+            <div className="-mx-1 mt-8 flex gap-2 overflow-x-auto whitespace-nowrap border-b border-border pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`border-b-2 px-1 py-3 text-sm font-medium transition sm:px-4 ${
+                  className={`shrink-0 border-b-2 px-2 py-3 text-sm font-medium transition sm:px-4 ${
                     activeTab === tab.id
                       ? "border-foreground text-foreground"
                       : "border-transparent text-muted-foreground hover:text-foreground"
@@ -524,15 +534,15 @@ export function RecordPreview() {
                 <div className="grid gap-5 lg:grid-cols-2">
                   <SectionCard title="Chronic conditions & diagnoses" icon={<Stethoscope className="h-4 w-4 text-emerald" />}>
                     <div className="space-y-4 text-sm">
-                      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+                      <div className="flex flex-col items-start gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-foreground">Gestational diabetes mellitus</span>
                         <Badge tone="neutral">Resolved — 2023</Badge>
                       </div>
-                      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+                      <div className="flex flex-col items-start gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-foreground">Iron deficiency anaemia</span>
                         <Badge tone="amber">Managed</Badge>
                       </div>
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-foreground">Uterine fibroids (small, multiple)</span>
                         <Badge tone="blue">Monitoring — annual USS</Badge>
                       </div>
@@ -574,7 +584,7 @@ export function RecordPreview() {
                     {overviewVitals.map((vital) => (
                       <div key={vital.label} className="rounded-2xl bg-background/30 p-4">
                         <div className="text-sm text-muted-foreground">{vital.label}</div>
-                        <div className="mt-2 text-3xl font-semibold text-foreground">
+                        <div className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">
                           {vital.value}
                           <span className="ml-1 text-sm font-normal text-muted-foreground">{vital.unit}</span>
                         </div>
@@ -585,20 +595,34 @@ export function RecordPreview() {
                 </SectionCard>
 
                 <SectionCard title="Immunisation record">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr_1fr]">
-                    <div className="hidden text-xs uppercase tracking-[0.2em] text-muted-foreground md:block">Vaccine</div>
-                    <div className="hidden text-xs uppercase tracking-[0.2em] text-muted-foreground md:block">Date</div>
-                    <div className="hidden text-xs uppercase tracking-[0.2em] text-muted-foreground md:block">Status</div>
+                  <div className="hidden gap-4 md:grid md:grid-cols-[2fr_1fr_1fr]">
+                    <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Vaccine</div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Date</div>
+                    <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Status</div>
                     {immunisations.map(([name, date, status, tone]) => (
                       <>
-                        <div key={`${name}-name`} className="border-t border-border pt-3 text-foreground md:border-t-0 md:pt-0">
+                        <div key={`${name}-name`} className="border-t border-border pt-3 text-foreground">
                           {name}
                         </div>
-                        <div key={`${name}-date`} className="text-muted-foreground">{date}</div>
-                        <div key={`${name}-status`}>
+                        <div key={`${name}-date`} className="border-t border-border pt-3 text-muted-foreground">
+                          {date}
+                        </div>
+                        <div key={`${name}-status`} className="border-t border-border pt-3">
                           <Badge tone={tone}>{status}</Badge>
                         </div>
                       </>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3 md:hidden">
+                    {immunisations.map(([name, date, status, tone]) => (
+                      <div key={name} className="rounded-2xl bg-background/30 p-4">
+                        <div className="text-sm font-medium text-foreground">{name}</div>
+                        <div className="mt-2 text-sm text-muted-foreground">Date: {date}</div>
+                        <div className="mt-3">
+                          <Badge tone={tone}>{status}</Badge>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </SectionCard>
@@ -697,7 +721,7 @@ export function RecordPreview() {
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <div className="text-2xl font-semibold tracking-tight text-foreground">
+                        <div className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                           {visit.hospital}
                         </div>
                         <div className="mt-1 text-sm text-muted-foreground">{visit.date}</div>
@@ -742,7 +766,7 @@ export function RecordPreview() {
                         className="flex flex-col gap-4 border-b border-border pb-5 last:border-b-0 last:pb-0 md:flex-row md:items-start md:justify-between"
                       >
                         <div>
-                          <div className="text-2xl font-semibold tracking-tight text-foreground">{med.name}</div>
+                          <div className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{med.name}</div>
                           <div className="mt-2 text-sm text-muted-foreground">{med.detail}</div>
                         </div>
                         <Badge tone={med.tone}>{med.status}</Badge>
@@ -767,7 +791,7 @@ export function RecordPreview() {
                         className="flex flex-col gap-4 border-b border-border pb-5 last:border-b-0 last:pb-0 md:flex-row md:items-start md:justify-between"
                       >
                         <div>
-                          <div className="text-2xl font-semibold tracking-tight text-foreground">{med.name}</div>
+                          <div className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{med.name}</div>
                           <div className="mt-2 text-sm text-muted-foreground">{med.detail}</div>
                         </div>
                         <Badge tone={med.tone}>{med.status}</Badge>
@@ -877,7 +901,7 @@ export function RecordPreview() {
                         className="flex flex-col gap-3 border-b border-border pb-4 last:border-b-0 last:pb-0 md:flex-row md:items-start md:justify-between"
                       >
                         <div>
-                          <div className="text-2xl font-semibold tracking-tight text-foreground">{entry.actor}</div>
+                          <div className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{entry.actor}</div>
                           <div className="mt-2 text-sm text-muted-foreground">
                             {entry.detail} · {entry.time}
                           </div>
