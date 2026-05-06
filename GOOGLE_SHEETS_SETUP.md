@@ -1,7 +1,7 @@
 Create a Google Sheet and name the first tab `Waitlist`.
 
 If you already have a working bound Apps Script, replace the code with this improved version so
-you can store more fields and prevent duplicate emails.
+you can store only `name + email` and prevent duplicate emails.
 
 ```javascript
 function doPost(e) {
@@ -19,7 +19,7 @@ function doPost(e) {
   const existingEmails =
     lastRow > 1
       ? sheet
-          .getRange(2, 3, lastRow - 1, 1)
+          .getRange(2, 2, lastRow - 1, 1)
           .getValues()
           .flat()
           .map((value) => String(value || "").trim().toLowerCase())
@@ -35,9 +35,6 @@ function doPost(e) {
     new Date(),
     data.name || "",
     email,
-    data.hospital || "",
-    data.role || "",
-    data.phone || "",
     data.source || "",
     data.submittedAt || "",
   ]);
@@ -74,11 +71,8 @@ Suggested sheet columns:
 1. `Created At`
 2. `Name`
 3. `Email`
-4. `Hospital`
-5. `Role`
-6. `Phone`
-7. `Source`
-8. `Submitted At`
+4. `Source`
+5. `Submitted At`
 
 Cleanup:
 

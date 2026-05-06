@@ -38,9 +38,7 @@ export function Waitlist() {
   const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL ?? DEFAULT_WAITLIST_ENDPOINT;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [hospital, setHospital] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState("");
+  const [submittedName, setSubmittedName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,9 +48,6 @@ export function Waitlist() {
 
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
-    const trimmedHospital = hospital.trim();
-    const trimmedPhone = phone.trim();
-    const trimmedRole = role.trim();
 
     if (trimmedName.length < 2) {
       setError("Please enter your full name.");
@@ -66,21 +61,6 @@ export function Waitlist() {
 
     if (trimmedEmail.length > 255) {
       setError("Email is too long.");
-      return;
-    }
-
-    if (trimmedHospital.length < 2) {
-      setError("Please enter your hospital or organisation.");
-      return;
-    }
-
-    if (trimmedRole.length < 2) {
-      setError("Please enter your role.");
-      return;
-    }
-
-    if (trimmedPhone && !/^[+\d\s()-]{7,20}$/.test(trimmedPhone)) {
-      setError("Please enter a valid phone number.");
       return;
     }
 
@@ -107,21 +87,16 @@ export function Waitlist() {
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
-          hospital: trimmedHospital,
-          phone: trimmedPhone,
-          role: trimmedRole,
           source: "lafia-waitlist",
           submittedAt: new Date().toISOString(),
         }),
       });
 
       saveSubmittedEmail(trimmedEmail);
+      setSubmittedName(trimmedName);
       setSubmitted(true);
       setName("");
       setEmail("");
-      setHospital("");
-      setPhone("");
-      setRole("");
     } catch {
       setError("Something went wrong while submitting. Please try again.");
     } finally {
@@ -151,8 +126,8 @@ export function Waitlist() {
             Be on the record <span className="italic text-emerald">from day one.</span>
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Hospitals, clinicians, regulators, and citizens - join the waitlist for the first
-            national rollout.
+            Hospitals, clinicians, regulators, founders, and citizens - join the waitlist for the
+            first national rollout.
           </p>
         </motion.div>
 
@@ -162,65 +137,30 @@ export function Waitlist() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto mt-12 max-w-2xl"
+          className="mx-auto mt-12 max-w-xl"
         >
           {!submitted ? (
             <>
               <div className="space-y-3 rounded-xl border border-border bg-card/80 p-3 shadow-glow backdrop-blur-xl">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    required
-                    maxLength={120}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full name"
-                    aria-label="Full name"
-                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
+                <input
+                  type="text"
+                  required
+                  maxLength={120}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Full name"
+                  aria-label="Full name"
+                  className="w-full rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                />
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                   <input
                     type="email"
                     required
                     maxLength={255}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@hospital.org"
+                    placeholder="you@gmail.com"
                     aria-label="Email address"
-                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    required
-                    maxLength={150}
-                    value={hospital}
-                    onChange={(e) => setHospital(e.target.value)}
-                    placeholder="Hospital or organisation"
-                    aria-label="Hospital or organisation"
-                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                  <input
-                    type="text"
-                    required
-                    maxLength={100}
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    placeholder="Role"
-                    aria-label="Role"
-                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                  <input
-                    type="tel"
-                    maxLength={20}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Phone number (optional)"
-                    aria-label="Phone number"
                     className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
                   />
                   <button
@@ -246,10 +186,11 @@ export function Waitlist() {
             >
               <div className="font-display text-2xl text-emerald">You&apos;re on the list.</div>
               <p className="mt-2 text-muted-foreground">
-                Thanks, {name || "there"}. We&apos;ll reach out when Lafia opens the first rollout.
+                Thanks, {submittedName || "there"}. We&apos;ll reach out when Lafia opens the first
+                rollout.
               </p>
               <p className="mt-3 text-sm text-muted-foreground">
-                Your details have been recorded for the launch waitlist.
+                Your email has been recorded for launch updates.
               </p>
             </motion.div>
           )}
