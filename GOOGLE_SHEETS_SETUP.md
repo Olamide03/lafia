@@ -1,15 +1,43 @@
 Create a Google Sheet and name the first tab `Waitlist`.
 
-In Google Sheets, go to `Extensions -> Apps Script` and paste this:
+If you already have a working bound Apps Script, replace the code with this improved version so
+you can store more fields and prevent duplicate emails.
 
 ```javascript
 function doPost(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Waitlist");
   const data = JSON.parse(e.postData.contents);
+  const email = String(data.email || "").trim().toLowerCase();
+
+  if (!email) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ ok: false, error: "Missing email" }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const lastRow = Math.max(sheet.getLastRow(), 1);
+  const existingEmails =
+    lastRow > 1
+      ? sheet
+          .getRange(2, 3, lastRow - 1, 1)
+          .getValues()
+          .flat()
+          .map((value) => String(value || "").trim().toLowerCase())
+      : [];
+
+  if (existingEmails.includes(email)) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ ok: true, duplicate: true }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
 
   sheet.appendRow([
     new Date(),
-    data.email || "",
+    data.name || "",
+    email,
+    data.hospital || "",
+    data.role || "",
+    data.phone || "",
     data.source || "",
     data.submittedAt || "",
   ]);
@@ -22,10 +50,14 @@ function doPost(e) {
 
 Deploy it:
 
-1. Click `Deploy -> New deployment`
-2. Choose `Web app`
-3. Set `Who has access` to `Anyone`
-4. Copy the `Web app URL`
+1. Open the Google Sheet you want to use
+2. Go to `Extensions -> Apps Script`
+3. Paste the code above
+4. Click `Deploy -> New deployment`
+5. Choose `Web app`
+6. Set `Execute as` to `Me`
+7. Set `Who has access` to `Anyone`
+8. Copy the `Web app URL`
 
 Create a local `.env` file in the project root with:
 
@@ -40,6 +72,17 @@ For Vercel, also add the same variable in the project settings:
 Suggested sheet columns:
 
 1. `Created At`
-2. `Email`
-3. `Source`
-4. `Submitted At`
+2. `Name`
+3. `Email`
+4. `Hospital`
+5. `Role`
+6. `Phone`
+7. `Source`
+8. `Submitted At`
+
+Cleanup:
+
+Delete these test rows if you no longer need them:
+
+1. `codex-test@example.com`
+2. `codex-second-test@example.com`

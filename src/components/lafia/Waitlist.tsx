@@ -3,25 +3,89 @@ import { useState } from "react";
 
 const DEFAULT_WAITLIST_ENDPOINT =
   "https://script.google.com/macros/s/AKfycbx_kg3m8qGVIhbOXoIJpCwy1fi-rxJOjS9wVaBpn7qAUPEDrhCOa46ATBEjOsNg5MitKw/exec";
+const LOCAL_STORAGE_KEY = "lafia-waitlist-emails";
+
+function hasSubmittedEmail(email: string) {
+  try {
+    const saved = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!saved) {
+      return false;
+    }
+
+    const emails = JSON.parse(saved) as string[];
+    return emails.includes(email.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+function saveSubmittedEmail(email: string) {
+  try {
+    const saved = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    const emails = saved ? (JSON.parse(saved) as string[]) : [];
+    const normalized = email.toLowerCase();
+
+    if (!emails.includes(normalized)) {
+      emails.push(normalized);
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(emails));
+    }
+  } catch {
+    // Ignore localStorage issues and keep the form usable.
+  }
+}
 
 export function Waitlist() {
   const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL ?? DEFAULT_WAITLIST_ENDPOINT;
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [hospital, setHospital] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const trimmed = email.trim();
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedHospital = hospital.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedRole = role.trim();
+
+    if (trimmedName.length < 2) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    if (trimmed.length > 255) {
+    if (trimmedEmail.length > 255) {
       setError("Email is too long.");
+      return;
+    }
+
+    if (trimmedHospital.length < 2) {
+      setError("Please enter your hospital or organisation.");
+      return;
+    }
+
+    if (trimmedRole.length < 2) {
+      setError("Please enter your role.");
+      return;
+    }
+
+    if (trimmedPhone && !/^[+\d\s()-]{7,20}$/.test(trimmedPhone)) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    if (hasSubmittedEmail(trimmedEmail)) {
+      setError("This email has already joined the waitlist.");
       return;
     }
 
@@ -41,14 +105,23 @@ export function Waitlist() {
           "Content-Type": "text/plain;charset=utf-8",
         },
         body: JSON.stringify({
-          email: trimmed,
+          name: trimmedName,
+          email: trimmedEmail,
+          hospital: trimmedHospital,
+          phone: trimmedPhone,
+          role: trimmedRole,
           source: "lafia-waitlist",
           submittedAt: new Date().toISOString(),
         }),
       });
 
+      saveSubmittedEmail(trimmedEmail);
       setSubmitted(true);
+      setName("");
       setEmail("");
+      setHospital("");
+      setPhone("");
+      setRole("");
     } catch {
       setError("Something went wrong while submitting. Please try again.");
     } finally {
@@ -89,29 +162,77 @@ export function Waitlist() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="mx-auto mt-12 max-w-xl"
+          className="mx-auto mt-12 max-w-2xl"
         >
           {!submitted ? (
             <>
-              <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/80 p-2 shadow-glow backdrop-blur-xl sm:flex-row sm:p-2">
-                <input
-                  type="email"
-                  required
-                  maxLength={255}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@hospital.org"
-                  aria-label="Email address"
-                  className="flex-1 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="rounded-lg bg-emerald px-6 py-3.5 font-medium text-ink shadow-glow transition hover:translate-y-[-1px]"
-                >
-                  {isSubmitting ? "Submitting..." : "Request Access"}
-                </button>
+              <div className="space-y-3 rounded-xl border border-border bg-card/80 p-3 shadow-glow backdrop-blur-xl">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    required
+                    maxLength={120}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Full name"
+                    aria-label="Full name"
+                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                  <input
+                    type="email"
+                    required
+                    maxLength={255}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@hospital.org"
+                    aria-label="Email address"
+                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    required
+                    maxLength={150}
+                    value={hospital}
+                    onChange={(e) => setHospital(e.target.value)}
+                    placeholder="Hospital or organisation"
+                    aria-label="Hospital or organisation"
+                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    required
+                    maxLength={100}
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    placeholder="Role"
+                    aria-label="Role"
+                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input
+                    type="tel"
+                    maxLength={20}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Phone number (optional)"
+                    aria-label="Phone number"
+                    className="rounded-lg border border-border/60 bg-transparent px-4 py-3.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="rounded-lg bg-emerald px-6 py-3.5 font-medium text-ink shadow-glow transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isSubmitting ? "Submitting..." : "Request Access"}
+                  </button>
+                </div>
               </div>
+
               {error && <p className="mt-3 text-sm text-amber">{error}</p>}
               <p className="mt-4 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 NDPR-compliant - No spam - Unsubscribe anytime
@@ -125,7 +246,10 @@ export function Waitlist() {
             >
               <div className="font-display text-2xl text-emerald">You&apos;re on the list.</div>
               <p className="mt-2 text-muted-foreground">
-                We&apos;ll be in touch as the first hospitals come online.
+                Thanks, {name || "there"}. We&apos;ll reach out when Lafia opens the first rollout.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Your details have been recorded for the launch waitlist.
               </p>
             </motion.div>
           )}
