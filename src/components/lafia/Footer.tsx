@@ -48,14 +48,6 @@ export function Footer() {
           </div>
           <div className="font-display text-lg">Folarin Nurudeen</div>
           <div className="text-muted-foreground">Lagos, Nigeria</div>
-          <a
-            href="https://cheflammy.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-emerald hover:underline"
-          >
-            cheflammy.vercel.app -&gt;
-          </a>
         </div>
       </div>
 

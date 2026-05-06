@@ -1,12 +1,17 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+const DEFAULT_WAITLIST_ENDPOINT =
+  "https://script.google.com/macros/s/AKfycbx_kg3m8qGVIhbOXoIJpCwy1fi-rxJOjS9wVaBpn7qAUPEDrhCOa46ATBEjOsNg5MitKw/exec";
+
 export function Waitlist() {
+  const endpoint = import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL ?? DEFAULT_WAITLIST_ENDPOINT;
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = email.trim();
 
@@ -20,8 +25,35 @@ export function Waitlist() {
       return;
     }
 
+    if (!endpoint) {
+      setError("Waitlist is not connected yet. Add your Google Sheets web app URL first.");
+      return;
+    }
+
     setError("");
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      await fetch(endpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: JSON.stringify({
+          email: trimmed,
+          source: "lafia-waitlist",
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+
+      setSubmitted(true);
+      setEmail("");
+    } catch {
+      setError("Something went wrong while submitting. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -74,9 +106,10 @@ export function Waitlist() {
                 />
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="rounded-lg bg-emerald px-6 py-3.5 font-medium text-ink shadow-glow transition hover:translate-y-[-1px]"
                 >
-                  Request Access
+                  {isSubmitting ? "Submitting..." : "Request Access"}
                 </button>
               </div>
               {error && <p className="mt-3 text-sm text-amber">{error}</p>}
